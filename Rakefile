@@ -4,7 +4,7 @@ require './bot.rb'
 desc "Botterbot!"
 task :bot do
   Bot.initialize
-  Bot.go
+  Bot.run
 end
  
 task :default => 'bot'
