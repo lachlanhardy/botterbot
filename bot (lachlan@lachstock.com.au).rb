@@ -12,20 +12,24 @@ class Bot
       :access_token        => ENV['TWITTER_ACCESS_TOKEN'],
       :access_token_secret => ENV['TWITTER_ACCESS_TOKEN_SECRET']
     }
-    @rClient = Twitter::REST::Client.new(config)
-    @sClient = Twitter::Streaming::Client.new(config)
+    @bot = Twitter::REST::Client.new(config)
+    @stream = Twitter::Streaming::Client.new(config)
+    Bot.topic
   end
 
-  def self.go
+  def self.topic
+    curses = %w{shit fuck cunt bastard fucking}
+    @query = %Q{"tony abbott" #{curses.join(" OR ")} -rt}
+  end
+
+  def self.run
+    Bot.initialize
     while true
       begin 
-        # topics to watch
-        topics = ['kanye']
-        @sClient.filter(:track => topics.join(',')) do |tweet|
+        @stream.filter(:track => @query) do |tweet|
           if tweet.is_a?(Twitter::Tweet) && !tweet.text.match(/^RT/) && tweet.lang == 'en'
             p "@#{tweet.user.screen_name}: #{tweet.text} (ID: #{tweet.id}) (#{tweet.lang})"
-            # @rClient.update("@#{tweet.user.screen_name} Pithy response", in_reply_to_status_id: tweet.id)
-            @rClient.fav tweet
+            # @bot.fav tweet
           end
         end
       rescue Exception => e
